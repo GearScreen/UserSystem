@@ -9,7 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.0.8",
+    "@prisma/adapter-mariadb": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "mariadb": "^3.4.5",
+    "next": "^16.0.10",
+    "prisma": "^7.1.0",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
