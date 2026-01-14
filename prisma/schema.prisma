@@ -18,10 +18,28 @@ generator client {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  name      String?
-  role      Role     @default(USER)
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
+  username        String?   @unique @db.VarChar(100)
+  role            Role      @default(USER)
+  status          Status    @default(ACTIVE)
+
+  // Password
+  passwordHash    String    @db.VarChar(255) @map("password_hash")
+  resetToken      String?   @unique @map("password_reset_token")
+  resetExpires    DateTime? @map("password_reset_expires_at")
+
+  // Security fields
+  loginAttempts   Int       @default(0) @map("login_attempts")
+  lockedUntil     DateTime? @map("locked_until")
+  lastLogin       DateTime? @map("last_login")
+
+  // Account Verification
+  emailVerified  Boolean @default(false) @map("email_verified")
+  verificationToken     String?   @unique @map("verification_token")
+  verificationExpiresAt DateTime? @map("verification_expires_at")
+
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
   @@index([email])
@@ -38,4 +56,5 @@ enum Status {
   ACTIVE
   INACTIVE
   SUSPENDED
+  LOCKED
 }

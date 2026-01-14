@@ -7,25 +7,26 @@ import { useState, useEffect } from 'react'
 export default function Register() {
     const [newUser, setNewUser] = useState({
         email: '',
-        name: ''
+        password: '',
+        username: ''
     })
 
-    // Create user
-    const createUser = async () => {
+    const tryRegister = async () => {
         try {
-            const response = await fetch('/api/users', {
+            const response = await fetch('/api/users/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: newUser.email,
-                    name: newUser.name || undefined
+                    password: newUser.password,
+                    username: newUser.username || undefined
                 })
             })
 
             const data = await response.json()
             if (data.success) {
-                alert('User created successfully!')
-                setNewUser({ email: '', name: '' })
+                alert('Account created successfully, please check your email to verify your account.')
+                setNewUser({ email: '', password: '', username: '' })
             } else {
                 alert(`Error: ${data.error}`)
             }
@@ -53,9 +54,10 @@ export default function Register() {
                         <span className="font-medium text-zinc-950 dark:text-zinc-50">Register your account</span><br></br>
                         Using : Email, Password, Username
                     </p>
-                    <input type="text" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
-                    <input type="text" placeholder="Password" className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
-                    <input type="text" placeholder="Username" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
+                    {/* INPUTS */}
+                    <input type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
+                    <input type="password" placeholder="Password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
+                    <input type="text" placeholder="Username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
                 </div>
                 <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
                     <Link className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
@@ -69,16 +71,12 @@ export default function Register() {
                         />
                         Main Page
                     </Link>
-                    {/* <Link className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-                        href="/login">
-                        Register
-                    </Link> */}
                     <Link className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
                         href="/login">
                         Login
                     </Link>
                     <button
-                        onClick={createUser}
+                        onClick={tryRegister}
                         disabled={!newUser.email}
                         className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]">
                         Register

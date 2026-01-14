@@ -9,7 +9,7 @@ export default function TestDBPage() {
     const testConnection = async () => {
         setStatus('loading')
         try {
-            const response = await fetch('/api/db/test')
+            const response = await fetch('/api/test')
             const data = await response.json()
 
             if (response.ok) {

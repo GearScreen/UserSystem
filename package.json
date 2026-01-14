@@ -9,16 +9,22 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
     "@prisma/adapter-mariadb": "^7.1.0",
     "@prisma/client": "^7.1.0",
+    "argon2": "^0.44.0",
+    "jsonwebtoken": "^9.0.3",
+    "mailgun.js": "^12.4.1",
     "mariadb": "^3.4.5",
     "next": "^16.0.10",
+    "next-auth": "^4.24.7",
     "prisma": "^7.1.0",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

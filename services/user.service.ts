@@ -1,8 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import {
-    CreateUserInput,
-    UpdateUserInput
-} from '@/types/user'
+import { CreateUserInput, UpdateUserInput } from '@/types/user'
 
 export class UserService {
 
@@ -12,7 +9,8 @@ export class UserService {
             const user = await prisma.user.create({
                 data: {
                     email: data.email,
-                    name: data.name,
+                    passwordHash: data.passwordHash,
+                    username: data.username,
                     role: data.role,
                 }
             })
@@ -79,7 +77,8 @@ export class UserService {
             const user = await prisma.user.update({
                 where: { id },
                 data: {
-                    name: data.name,
+                    username: data.username,
+                    passwordHash: data.passwordHash,
                     role: data.role,
                     status: data.status,
                     createdAt: new Date()
@@ -130,6 +129,9 @@ export class UserService {
             return { success: false, error: error.message }
         }
     }
+
+    // TODO: SOFT DELETE inactive (1month) users
+    // TODO: HARD DELETE unverified + inactive users
 
     // STATS - Get user statistics
     static async getUserStats() {

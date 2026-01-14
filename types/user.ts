@@ -1,11 +1,13 @@
 export interface CreateUserInput {
     email: string
-    name?: string
+    passwordHash: string
+    username?: string
     role?: 'USER' | 'ADMIN' | 'MODERATOR'
 }
 
 export interface UpdateUserInput {
-    name?: string
+    username?: string
+    passwordHash?: string
     role?: 'USER' | 'ADMIN' | 'MODERATOR'
     status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 }
@@ -13,16 +15,9 @@ export interface UpdateUserInput {
 export interface UserResponse {
     id: number
     email: string
-    name: string | null
+    username: string | null
     role: string
     status: string
     createdAt: Date
     updatedAt: Date
-}
-
-export interface PaginationParams {
-    page?: number
-    limit?: number
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
 }
