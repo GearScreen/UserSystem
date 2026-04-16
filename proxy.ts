@@ -1,47 +1,30 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Rate limiting
 const rateLimit = new Map<string, { count: number; resetTime: number }>()
 
 export async function proxy(request: NextRequest) {
     const forwardedFor = request.headers.get('x-forwarded-for');
-    // const ip = forwardedFor?.split(',')[0].trim() || "Unknown"
-    const ip = request.headers.get("x-real-ip") || "Unknown";
+    const ip = forwardedFor?.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
     const path = request.nextUrl.pathname;
     // console.log('Request from IP:', ip, ' to path:', path);
 
     // TODO: Refresh Session
 
-    // Rate limiting for auth endpoints
-    if (path.startsWith('/api/users')) {
-        // console.log('Applying rate limiting for IP:', ip);
-        const now = Date.now()
-        const limit = rateLimit.get(ip)
+    // TODO : Redirect if user is not authorized
+    // NextResponse.redirect(new URL('/', request.url))
 
-        // TODO : Redirect if user is not authorized
-        // NextResponse.redirect(new URL('/', request.url))
-
-        if (limit) {
-            if (now < limit.resetTime) {
-                if (limit.count >= 10) { // 10 requests per window
-                    return NextResponse.json(
-                        { error: 'Too many requests' },
-                        { status: 429 }
-                    )
-                }
-                rateLimit.set(ip, { count: limit.count + 1, resetTime: limit.resetTime })
-            } else {
-                rateLimit.set(ip, { count: 1, resetTime: now + 60 * 1000 }) // 1 minute window
-            }
-        } else {
-            rateLimit.set(ip, { count: 1, resetTime: now + 60 * 1000 })
-        }
+    if (path.startsWith('/api/users') && (limitRate(ip))) {
+        return NextResponse.json(
+                { error: 'Too many requests' },
+                { status: 429 }
+            )
     }
 
     // Security headers
     const response = NextResponse.next()
 
+    request.headers.set('x-user-ip', ip)
     response.headers.set('X-Content-Type-Options', 'nosniff')
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-XSS-Protection', '1; mode=block')
@@ -52,4 +35,29 @@ export async function proxy(request: NextRequest) {
     )
 
     return response
+}
+
+function limitRate(ip: string) {
+    const now = Date.now()
+    const ipLimit = rateLimit.get(ip)
+
+    let resetTime = now + 60_000 // 1 minute window
+
+    if (!ipLimit) {
+        rateLimit.set(ip, { count: 1, resetTime })
+        return false
+    }
+
+    rateLimit.set(ip, { count: ipLimit.count + 1, resetTime })
+
+    if (ipLimit.count < 5) {
+        return false
+    }
+
+    if (now < ipLimit.resetTime) {
+        console.log("1 Minute Block")
+        return true
+    } else {
+        rateLimit.set(ip, { count: 1, resetTime })
+    }
 }

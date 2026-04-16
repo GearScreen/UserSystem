@@ -28,8 +28,8 @@ model User {
   resetExpires    DateTime? @map("password_reset_expires_at")
 
   // Security fields
-  loginAttempts   Int       @default(0) @map("login_attempts")
-  lockedUntil     DateTime? @map("locked_until")
+  // loginAttempts   Int       @default(0) @map("login_attempts")
+  // lockedUntil     DateTime? @map("locked_until")
   lastLogin       DateTime? @map("last_login")
 
   // Account Verification
@@ -44,6 +44,22 @@ model User {
   @@map("users")
   @@index([email])
   @@index([role])
+}
+
+model LoginAttempt {
+  id              Int       @id @default(autoincrement())
+  ipAddress       String    @map("ip_address") @db.VarChar(45)
+  attemptCount    Int       @default(1) @map("attempt_count")
+  firstAttemptAt  DateTime  @map("first_attempt_at")
+  lastAttemptAt   DateTime  @map("last_attempt_at")
+  lockedUntil     DateTime? @map("locked_until")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([ipAddress])
+  @@index([lockedUntil])
+  @@index([lastAttemptAt])
+  @@map("login_attempts")
 }
 
 enum Role {
