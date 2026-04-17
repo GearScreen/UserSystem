@@ -2,7 +2,6 @@ import { prisma } from '@/lib/prisma'
 import { CreateUserInput, UpdateUserInput } from '@/types/user'
 
 export class UserService {
-
     // CREATE - Add new user
     static async createUser(data: CreateUserInput) {
         try {
@@ -129,9 +128,6 @@ export class UserService {
             return { success: false, error: error.message }
         }
     }
-
-    // TODO: SOFT DELETE inactive (1month) users
-    // TODO: HARD DELETE unverified + inactive users
 
     // STATS - Get user statistics
     static async getUserStats() {

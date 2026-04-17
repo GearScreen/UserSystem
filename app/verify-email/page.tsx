@@ -56,49 +56,44 @@ export default function VerifyEmailPage() {
                         </h2>
                         < p className="text-gray-600" > Please wait...</p>
                     </div>
-                )
-                }
+                )}
 
-                {
-                    status === 'success' && (
-                        <div className="text-center" >
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" >
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" > </path>
-                                </svg>
-                            </div>
-                            < h2 className="text-2xl font-bold text-gray-900 mb-2" >
-                                Email Verified!
-                            </h2>
-                            < p className="text-gray-600 mb-4" > {message} </p>
-                            < p className="text-sm text-gray-500" >
-                                Redirecting to login page...
-                            </p>
+                {status === 'success' && (
+                    <div className="text-center" >
+                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4" >
+                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" > </path>
+                            </svg>
                         </div>
-                    )
-                }
+                        < h2 className="text-2xl font-bold text-gray-900 mb-2" >
+                            Email Verified!
+                        </h2>
+                        < p className="text-gray-600 mb-4" > {message} </p>
+                        < p className="text-sm text-gray-500" >
+                            Redirecting to login page...
+                        </p>
+                    </div>
+                )}
 
-                {
-                    status === 'error' && (
-                        <div className="text-center" >
-                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" >
-                                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" > </path>
-                                </svg>
-                            </div>
-                            < h2 className="text-2xl font-bold text-gray-900 mb-2" >
-                                Verification Failed
-                            </h2>
-                            < p className="text-gray-600 mb-6" > {message} </p>
-                            < Link
-                                href="/resend-verification"
-                                className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                            >
-                                Resend Verification Link
-                            </Link>
+                {status === 'error' && (
+                    <div className="text-center" >
+                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" >
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" > </path>
+                            </svg>
                         </div>
-                    )
-                }
+                        < h2 className="text-2xl font-bold text-gray-900 mb-2" >
+                            Verification Failed
+                        </h2>
+                        < p className="text-gray-600 mb-6" > {message} </p>
+                        < Link
+                            href="/resend-verification"
+                            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                        >
+                            Resend Verification Link
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );

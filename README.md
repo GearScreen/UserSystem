@@ -1,6 +1,6 @@
 # User System
 
-Simple & Secure user system
+Simple & Secure user system named Thedas
 
 ## Stack
 
@@ -10,15 +10,17 @@ Front :<br>
 
 Back :<br>
 -Next.js<br>
--MariaDB<br>
--Prisma<br>
+-Auth.js<br>
 -JsonWebToken<br>
 -Argon2<br>
+-Prisma<br>
+-MariaDB<br>
 
 ## Features
 
 -Register Users<br>
 -Login<br>
+-Send Mails (using Mailgun)<br>
 
 ## CURL Commands (Testing API)
 

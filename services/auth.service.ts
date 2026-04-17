@@ -147,19 +147,35 @@ export class AuthService {
     static async incrementLoginAttempts(userId: number, loginAttempts: number) {
         try {
             await prisma.user.update({
-                    where: { id: userId },
-                    data: {
-                        loginAttempts: { increment: 1 },
-                        ...(loginAttempts + 1 >= 5 ? {
-                            lockedUntil: new Date(Date.now() + 15 * 60 * 1000), // Lock for 15 minutes
-                            status: 'LOCKED'
-                        } : {})
-                    }
-                })
+                where: { id: userId },
+                data: {
+                    loginAttempts: { increment: 1 },
+                    ...(loginAttempts + 1 >= 5 ? {
+                        lockedUntil: new Date(Date.now() + 15 * 60_000), // Lock for 15 minutes
+                        status: 'LOCKED'
+                    } : {})
+                }
+            })
 
-                return 5 - (loginAttempts + 1)
+            return 5 - (loginAttempts + 1)
         } catch (error: any) {
             console.error('Increment login attempts error:', error)
+        }
+    }
+
+    static async resetLoginAttempts(userId: number, status: string) {
+        try {
+            await prisma.user.update({
+                where: { id: userId }, // user.id
+                data: {
+                    loginAttempts: 0,
+                    lockedUntil: null,
+                    lastLogin: new Date(),
+                    ...(status === 'LOCKED' ? { status: 'ACTIVE' } : {}) // user.status
+                }
+            })
+        } catch (error: any) {
+            console.error('Reset login attempts error:', error)
         }
     }
 
@@ -177,22 +193,6 @@ export class AuthService {
             }
         } catch (error: any) {
             console.error('Password rehash error:', error)
-        }
-    }
-
-    static async resetLoginAttempts(userId: number, status: string) {
-        try {
-            await prisma.user.update({
-                where: { id: userId }, // user.id
-                data: {
-                    loginAttempts: 0,
-                    lockedUntil: null,
-                    lastLogin: new Date(),
-                    ...(status === 'LOCKED' ? { status: 'ACTIVE' } : {}) // user.status
-                }
-            })
-        } catch (error: any) {
-            console.error('Reset login attempts error:', error)
         }
     }
 
@@ -362,4 +362,7 @@ export class AuthService {
             }
         }
     }
+
+    // TODO: SOFT DELETE inactive (1month) users
+    // TODO: HARD DELETE unverified + inactive users
 }
