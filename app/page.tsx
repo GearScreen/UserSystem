@@ -21,7 +21,7 @@ export default function Home() {
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Features : <br></br>
             -Register <br></br>
-            -Login <br></br>
+            -Login + Session <br></br>
             -Logged Page : Logout, Account Settings <br></br>
             -Security : hash, salt, 2FA <br></br>
           </p>

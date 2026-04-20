@@ -121,7 +121,6 @@ export class AuthService {
             // Successful login
 
             await this.resetLoginAttempts(user.id, user.status);
-
             await this.checkPasswordRehash(user.id, user.passwordHash, credentials.password);
 
             // Remove password hash from response
@@ -134,7 +133,6 @@ export class AuthService {
                 success: true,
                 data: safeUser
             }
-
         } catch (error: any) {
             console.error('Login error:', error)
             return {
@@ -146,18 +144,20 @@ export class AuthService {
 
     static async incrementLoginAttempts(userId: number, loginAttempts: number) {
         try {
+            let currentAttemps = loginAttempts + 1
+
             await prisma.user.update({
                 where: { id: userId },
                 data: {
                     loginAttempts: { increment: 1 },
-                    ...(loginAttempts + 1 >= 5 ? {
+                    ...(currentAttemps >= 5 ? {
                         lockedUntil: new Date(Date.now() + 15 * 60_000), // Lock for 15 minutes
                         status: 'LOCKED'
                     } : {})
                 }
             })
 
-            return 5 - (loginAttempts + 1)
+            return 5 - (currentAttemps)
         } catch (error: any) {
             console.error('Increment login attempts error:', error)
         }

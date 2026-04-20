@@ -1,18 +1,24 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
   provider = "mysql"
-  // url      = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
 generator client {
   provider = "prisma-client-js"
   // output   = "../app/generated/prisma"
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  LOCKED
 }
 
 model User {
@@ -30,7 +36,6 @@ model User {
   // Security fields
   // loginAttempts   Int       @default(0) @map("login_attempts")
   // lockedUntil     DateTime? @map("locked_until")
-  lastLogin       DateTime? @map("last_login")
 
   // Account Verification
   emailVerified  Boolean @default(false) @map("email_verified")
@@ -40,6 +45,7 @@ model User {
   // Timestamps
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
+  lastLogin       DateTime? @map("last_login")
 
   @@map("users")
   @@index([email])
@@ -60,17 +66,4 @@ model LoginAttempt {
   @@index([lockedUntil])
   @@index([lastAttemptAt])
   @@map("login_attempts")
-}
-
-enum Role {
-  USER
-  ADMIN
-  MODERATOR
-}
-
-enum Status {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  LOCKED
 }

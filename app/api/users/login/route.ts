@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generate JWT token
+        // Generate JWT token -> in auth service?
         const token = jwt.sign(
             { userId: result.data.id, email: result.data.email },
             process.env.JWT_SECRET as string, { expiresIn: parseInt(process.env.JWT_EXPIRES_IN as string) }
@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
             data: result.data,
             token
         })
-
     } catch (error: any) {
         return NextResponse.json(
             { success: false, error: 'Login failed' },
