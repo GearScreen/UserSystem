@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         const result = await AuthService.login({
             email: body.email,
             password: body.password
-        })
+        }, request)
 
         if (!result.success) {
             const status = result.locked ? 423 : 401 // 423 = Locked
@@ -35,17 +35,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generate JWT token -> in auth service?
-        const token = jwt.sign(
-            { userId: result.data.id, email: result.data.email },
-            process.env.JWT_SECRET as string, { expiresIn: parseInt(process.env.JWT_EXPIRES_IN as string) }
-        )
-        // console.log("Generated JWT Token:", token);
-
         return NextResponse.json({
             success: true,
             data: result.data,
-            token
+            token: result.token,
         })
     } catch (error: any) {
         return NextResponse.json(

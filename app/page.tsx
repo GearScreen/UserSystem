@@ -22,8 +22,8 @@ export default function Home() {
             Features : <br></br>
             -Register <br></br>
             -Login + Session <br></br>
-            -Logged Page : Logout, Account Settings <br></br>
-            -Security : hash, salt, 2FA <br></br>
+            -Account Settings + Logout <br></br>
+            -Security : hash, salt, 2FA, IP Lockout <br></br>
           </p>
         </div>
         {/* SESSION */}

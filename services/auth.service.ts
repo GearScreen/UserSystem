@@ -1,8 +1,12 @@
+import { NextRequest } from 'next/server';
+
 import { prisma } from '@/lib/prisma'
 import { PasswordManager } from '@/lib/auth/password'
-import { randomBytes } from 'crypto'
 import { EmailService } from '@/services/email.service'
+
+import { randomBytes } from 'crypto'
 import { generateTokenWithExpiry } from '@/lib/verif_token';
+import jwt from "jsonwebtoken";
 
 export class AuthService {
     static async register(userData: {
@@ -11,6 +15,8 @@ export class AuthService {
         username: string
     }) {
         try {
+            // IP Block
+
             // Validate password strength
             const validation = PasswordManager.validatePasswordStrength(userData.password)
             if (!validation.isValid) {
@@ -71,20 +77,17 @@ export class AuthService {
     static async login(credentials: {
         email: string
         password: string
-    }) {
+    }, request: NextRequest) {
         try {
-            // Check if account is locked
-            const lockedUser = await prisma.user.findFirst({
-                where: {
-                    email: credentials.email,
-                    lockedUntil: { gt: new Date() }
-                }
-            })
+            const forwardedFor = request.headers.get('x-forwarded-for');
+            const ip = forwardedFor?.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
 
-            if (lockedUser) {
+            // check IP block
+            const isIpBlocked = await this.isIpBlocked(ip)
+            if (isIpBlocked) {
                 return {
                     success: false,
-                    error: 'Account is temporarily locked. Try again later.',
+                    error: "Too many attempts. Please try again later.",
                     locked: true
                 }
             }
@@ -94,12 +97,14 @@ export class AuthService {
                 where: { email: credentials.email }
             })
 
+            const errMessage = 'Invalid credentials'
+
             if (!user) {
-                // Simulate delay to prevent timing attacks
+                // Simulate delay -> prevent timing attacks
                 await PasswordManager.hashPassword('dummy_password')
                 return {
                     success: false,
-                    error: 'Invalid credentials'
+                    error: errMessage,
                 }
             }
 
@@ -109,29 +114,42 @@ export class AuthService {
                 user.passwordHash
             )
 
+            await this.recordLoginAttempt(ip, credentials.email, isValid);
+
             if (!isValid) {
-                const attemptsLeft = await this.incrementLoginAttempts(user.id, user.loginAttempts) || 0;
                 return {
                     success: false,
-                    error: `Invalid credentials. ${attemptsLeft > 0 ? `${attemptsLeft} attempts remaining` : 'Account locked for 15 minutes'}`,
-                    locked: user.loginAttempts + 1 >= 5
+                    error: errMessage,
+                }
+            }
+
+            // Check if account is locked
+            if (user.lockedUntil) {
+                return {
+                    success: false,
+                    error: 'Account is temporarily locked. Try again later.',
+                    locked: true
                 }
             }
 
             // Successful login
 
-            await this.resetLoginAttempts(user.id, user.status);
+            // await this.resetLoginAttempts(user.id, user.status);
             await this.checkPasswordRehash(user.id, user.passwordHash, credentials.password);
 
             // Remove password hash from response
             const { passwordHash, ...safeUser } = user
 
-            // TODO: Create Session / JWT Token
-            // Session expires
+            // Sign JWT
+            const token = jwt.sign(
+                { userId: user.id, email: user.email },
+                process.env.JWT_SECRET as string, { expiresIn: parseInt(process.env.JWT_EXPIRES_IN as string) }
+            )
 
             return {
                 success: true,
-                data: safeUser
+                data: safeUser,
+                token: token,
             }
         } catch (error: any) {
             console.error('Login error:', error)
@@ -142,42 +160,74 @@ export class AuthService {
         }
     }
 
-    static async incrementLoginAttempts(userId: number, loginAttempts: number) {
+    static async isIpBlocked(ip: string) {
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+
+        const recentFailures = await prisma.loginAttempt.count({
+            where: {
+                ipAddress: ip,
+                success: false,
+                createdAt: { gte: fifteenMinutesAgo },
+            },
+        });
+
+        if (recentFailures >= 5) {
+            return true;
+        }
+
+        return false;
+    }
+
+    static async recordLoginAttempt(ip: string, email: string, isValid: boolean) {
         try {
-            let currentAttemps = loginAttempts + 1
-
-            await prisma.user.update({
-                where: { id: userId },
+            await prisma.loginAttempt.create({
                 data: {
-                    loginAttempts: { increment: 1 },
-                    ...(currentAttemps >= 5 ? {
-                        lockedUntil: new Date(Date.now() + 15 * 60_000), // Lock for 15 minutes
-                        status: 'LOCKED'
-                    } : {})
-                }
-            })
-
-            return 5 - (currentAttemps)
+                    emailUsed: email,
+                    ipAddress: ip,
+                    success: isValid,
+                },
+            });
         } catch (error: any) {
             console.error('Increment login attempts error:', error)
         }
     }
 
-    static async resetLoginAttempts(userId: number, status: string) {
-        try {
-            await prisma.user.update({
-                where: { id: userId }, // user.id
-                data: {
-                    loginAttempts: 0,
-                    lockedUntil: null,
-                    lastLogin: new Date(),
-                    ...(status === 'LOCKED' ? { status: 'ACTIVE' } : {}) // user.status
-                }
-            })
-        } catch (error: any) {
-            console.error('Reset login attempts error:', error)
-        }
-    }
+    // static async incrementLoginAttempts(userId: number, loginAttempts: number) {
+    //     try {
+    //         let currentAttemps = loginAttempts + 1
+
+    //         await prisma.user.update({
+    //             where: { id: userId },
+    //             data: {
+    //                 loginAttempts: { increment: 1 },
+    //                 ...(currentAttemps >= 5 ? {
+    //                     lockedUntil: new Date(Date.now() + 15 * 60_000), // Lock for 15 minutes
+    //                     status: 'LOCKED'
+    //                 } : {})
+    //             }
+    //         })
+
+    //         return 5 - (currentAttemps)
+    //     } catch (error: any) {
+    //         console.error('Increment login attempts error:', error)
+    //     }
+    // }
+
+    // static async resetLoginAttempts(userId: number, status: string) {
+    //     try {
+    //         await prisma.user.update({
+    //             where: { id: userId }, // user.id
+    //             data: {
+    //                 loginAttempts: 0,
+    //                 lockedUntil: null,
+    //                 lastLogin: new Date(),
+    //                 ...(status === 'LOCKED' ? { status: 'ACTIVE' } : {}) // user.status
+    //             }
+    //         })
+    //     } catch (error: any) {
+    //         console.error('Reset login attempts error:', error)
+    //     }
+    // }
 
     static async checkPasswordRehash(userId: number, passwordHash: string, password: string) {
         try {

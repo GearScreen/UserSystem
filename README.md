@@ -22,7 +22,13 @@ Back :<br>
 -Login<br>
 -Send Mails (using Mailgun)<br>
 
-## CURL Commands (Testing API)
+## Security
+
+-Hash & Salt<br>
+-Vs Timing Attacks<br>
+-IP Based Lockout<br>
+
+## CURL Commands
 
 ### Create / Register New User
 
@@ -31,6 +37,8 @@ Back :<br>
 ### Create New User (Weak Password)
 
 ```curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\", \"password\":\"test2\", \"username\":\"testUser2\"}" http://localhost:3000/api/users/register```
+
+## Staging CURL Commands (Deleted in Production)
 
 ### Get Users
 
