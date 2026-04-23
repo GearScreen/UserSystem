@@ -1,14 +1,24 @@
-import NextAuth from "next-auth";
+import NextAuth from "next-auth"
+import "next-auth/jwt"
+
 import Credentials from "next-auth/providers/credentials";
+import argon2 from "argon2";
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import argon2 from "argon2";
+
+import GitHub from "next-auth/providers/github"
+import Google from "next-auth/providers/google"
+import Twitter from "next-auth/providers/twitter"
 
 // Auth.js Config
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
-    session: { strategy: "jwt" },
+    session: { strategy: "jwt" }, // Required for middleware & performance
     providers: [
+        GitHub,
+        Google,
+        Twitter,
         Credentials({
             async authorize(credentials) {
                 const user = await prisma.user.findUnique({
@@ -25,16 +35,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
+    basePath: "/auth",
     callbacks: {
         async jwt({ token, user }) {
-            // Add Role to JWT
+            // Step 1: When the user logs in, add the role to the JWT
             if (user) {
                 token.role = user.role;
             }
             return token;
         },
         async session({ session, token }) {
-            // Add role to session
+            // Step 2: Make the role available in the session object
             if (token.role) {
                 session.user.role = token.role;
             }
@@ -42,3 +53,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
     },
 });
+
+declare module "next-auth" {
+    interface Session {
+        accessToken?: string
+    }
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        accessToken?: string
+    }
+}

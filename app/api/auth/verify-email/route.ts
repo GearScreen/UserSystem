@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Already Verified?
+        // Check Already Verified
         if (user.emailVerified) {
             return NextResponse.json(
                 { message: 'Email already verified' },
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Token Expired?
+        // Checck Token Expired
         if (new Date() > new Date(user.verificationExpiresAt)) {
             return NextResponse.json(
                 { error: 'Verification link has expired' },
@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             message: 'Email verified successfully'
         }, { status: 200 });
-
     } catch (error) {
         console.error('Verification error:', error);
         return NextResponse.json(

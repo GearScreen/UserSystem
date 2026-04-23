@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { AuthService } from '@/services/auth.service'
-import jwt from "jsonwebtoken";
+import { UserService } from '@/services/user.service'
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,7 +14,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const result = await AuthService.login({
+        const result = await UserService.login({
             email: body.email,
             password: body.password
         }, request)

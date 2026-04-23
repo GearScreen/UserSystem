@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { auth } from "@/auth";
+
 const rateLimit = new Map<string, { count: number; resetTime: number }>()
 
 export async function proxy(request: NextRequest) {
@@ -11,10 +13,16 @@ export async function proxy(request: NextRequest) {
 
     // TODO: Refresh Session
 
-    // TODO : Redirect if user is not authorized
+    // TODO : Redirect if user is not authorized (Based on session)
     // NextResponse.redirect(new URL('/', request.url))
+    
+    // const session = await auth();
 
-    if (path.startsWith('/api/users') && (limitRate(ip))) {
+    // if (session.user.role !== "ADMIN") {
+    //     console.log("ADMIN Access");
+    // }
+
+    if (path.startsWith('/api') && (limitRate(ip))) { // /api/users
         return NextResponse.json(
                 { error: 'Too many requests' },
                 { status: 429 }
@@ -55,7 +63,7 @@ function limitRate(ip: string) {
     }
 
     if (now < ipLimit.resetTime) {
-        console.log("1 Minute Block")
+        console.log(`1 Minute Block for IP : ${ip}`)
         return true
     } else {
         rateLimit.set(ip, { count: 1, resetTime })

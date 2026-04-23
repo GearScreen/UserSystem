@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { AuthService } from '@/services/auth.service'
+import { UserService } from '@/services/user.service'
 
 export async function POST(request: NextRequest) {
     try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const result = await AuthService.register({
+        const result = await UserService.register({
             email: body.email,
             password: body.password,
             username: body.username

@@ -36,15 +36,15 @@ Back :<br>
 
 ### Create New User (Weak Password)
 
-```curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\", \"password\":\"test2\", \"username\":\"testUser2\"}" http://localhost:3000/api/users/register```
+```curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\", \"password\":\"Test2\", \"username\":\"testUser2\"}" http://localhost:3000/api/users/register```
 
-## Staging CURL Commands (Deleted in Production)
+## Staging CURL Commands (Protect routes in Production)
 
-### Get Users
+### Read Users
 
 ```curl http://localhost:3000/api/users```
 
-### Get User by ID
+### Read User by ID
 
 ```curl http://localhost:3000/api/users?id=1```
 

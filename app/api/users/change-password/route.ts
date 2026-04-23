@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { AuthService } from '@/services/auth.service'
+import { UserService } from '@/services/user.service'
 // import { getUserIdFromToken } from '@/lib/auth/jwt' //TODO
 
 export async function POST(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const result = await AuthService.changePassword(userId, {
+        const result = await UserService.changePassword(userId, {
             currentPassword: body.currentPassword,
             newPassword: body.newPassword
         })

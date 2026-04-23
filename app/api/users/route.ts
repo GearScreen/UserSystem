@@ -1,44 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { UserService } from '@/services/user.service'
-import { CreateUserInput, UpdateUserInput } from '@/types/user'
 
-// ADD User
-export async function POST(request: NextRequest) {
-    try {
-        const body: CreateUserInput = await request.json()
+import { Prisma } from '@prisma/client';
 
-        // Validation
-        if (!body.email) {
-            return NextResponse.json(
-                { success: false, error: 'Email is required' },
-                { status: 400 }
-            )
-        }
-
-        const result = await UserService.createUser(body)
-
-        if (!result.success) {
-            const status = result.error === 'Email already exists' ? 409 : 400
-            return NextResponse.json(
-                { success: false, error: result.error },
-                { status }
-            )
-        }
-
-        return NextResponse.json(
-            { success: true, data: result.data },
-            { status: 201 }
-        )
-
-    } catch (error: any) {
-        return NextResponse.json(
-            { success: false, error: 'Internal server error' },
-            { status: 500 }
-        )
-    }
-}
-
-// Get User(s)
+// Read User(s)
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams
@@ -100,7 +65,7 @@ export async function PUT(request: NextRequest) {
             }
             console.log("Updating user with ID:", id);
 
-            const body: UpdateUserInput = await request.json()
+            const body: Prisma.UserUpdateInput = await request.json()
             const result = await UserService.updateUser(id, body)
 
             if (!result.success) {

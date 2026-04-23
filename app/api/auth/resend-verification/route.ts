@@ -43,7 +43,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             message: 'Verification link sent to your email'
         }, { status: 200 });
-
     } catch (error) {
         console.error('Resend verification error:', error);
         return NextResponse.json(

@@ -6,9 +6,9 @@ import type { JWT } from "next-auth/jwt"
 // import GitHubProvider from "next-auth/providers/github"
 // import { compare } from "bcryptjs"
 
-import { AuthService } from "@/services/auth.service"
+import { UserService } from "@/services/user.service"
 import { prisma } from "@/lib/prisma"
-import { PasswordManager } from '@/lib/auth/password'
+import { PasswordManager } from '@/lib/password'
 
 declare module "next-auth" {
     interface Session {
