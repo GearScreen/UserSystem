@@ -11,42 +11,76 @@ import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import Twitter from "next-auth/providers/twitter"
 
-// Auth.js Config
+// Auth.js Login
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: PrismaAdapter(prisma),
-    session: { strategy: "jwt" }, // Required for middleware & performance
+    adapter: PrismaAdapter(prisma) as any,
+    session: { strategy: "jwt" },
     providers: [
         GitHub,
         Google,
         Twitter,
         Credentials({
-            async authorize(credentials) {
+            async authorize(credentials, request) {
+                const email = credentials?.email as string;
+                const password = credentials?.password as string;
+
+                const forwardedFor = request.headers.get('x-forwarded-for');
+                const ip = forwardedFor?.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
+
+                // Brute Force Attack -> Rate Limit
+                let isBlocked = await isIpBlocked(ip)
+                if (isBlocked) {
+                    await argon2.verify(process.env.DUMMY_HASH!, password);
+                    throw new Error("Too many requests");
+                }
+
+                // Find user
                 const user = await prisma.user.findUnique({
-                    where: { email: credentials.email as string }
+                    where: { email: email }
                 });
 
-                if (!user || !user.password) return null;
+                if (!user || !user.passwordHash) {
+                    // Timing Attack -> Dummy Check
+                    await argon2.verify(process.env.DUMMY_HASH!, password);
+                    recordLoginAttempt(ip, email, false)
+                    return null;
+                }
 
-                const isValid = await argon2.verify(user.password, credentials.password as string);
+                // Verify User
+                const isValid = await argon2.verify(user.passwordHash, password);
 
-                if (!isValid) return null;
+                recordLoginAttempt(ip, email, isValid)
 
-                return { id: user.id, email: user.email, role: user.role };
+                if (!isValid) {
+                    console.log("Invalid Credentials");
+                    throw new Error("Invalid Credentials");
+                }
+
+                // Check if account is Locked/Banned
+                if (user.lockedUntil) {
+                    throw new Error('Account is temporarily locked. Try again later.');
+                }
+
+                // Cleanup Failed Attempts
+                await prisma.loginAttempt.deleteMany({ where: { ipAddress: ip, emailUsed: email, success: false } });
+
+                console.log("Logged in");
+                return { id: user.id.toString(), email: user.email, role: user.role };
             },
         }),
     ],
     basePath: "/auth",
     callbacks: {
         async jwt({ token, user }) {
-            // Step 1: When the user logs in, add the role to the JWT
             if (user) {
+                token.id = user.id;
                 token.role = user.role;
             }
             return token;
         },
         async session({ session, token }) {
-            // Step 2: Make the role available in the session object
             if (token.role) {
+                session.user.id = token.id;
                 session.user.role = token.role;
             }
             return session;
@@ -54,14 +88,64 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 });
 
+async function isIpBlocked(ip: string) {
+    try {
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+
+        const recentFailures = await prisma.loginAttempt.count({
+            where: {
+                ipAddress: ip,
+                success: false,
+                createdAt: { gte: fifteenMinutesAgo },
+            },
+        });
+
+        if (recentFailures >= 5) {
+            return true;
+        }
+
+        return false;
+    } catch (error: any) {
+        console.error('IP Block error:', error)
+        return true
+    }
+}
+
+async function recordLoginAttempt(ip: string, email: string, success: boolean) {
+    try {
+        // console.log(`Recording login attempt : ip = ${ip}, email = ${email}, success = ${success}`);
+        await prisma.loginAttempt.create({
+            data: {
+                emailUsed: email,
+                ipAddress: ip,
+                success: success,
+            },
+        });
+    } catch (error: any) {
+        console.error('Increment login attempts error:', error)
+    }
+}
+
 declare module "next-auth" {
+    interface User {
+        id: string;
+        email: string;
+        role: string;
+    }
+
     interface Session {
-        accessToken?: string
+        accessToken?: string;
+        user: {
+            id: string;
+            role: string;
+        }
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
         accessToken?: string
+        id: string;
+        role: string;
     }
 }

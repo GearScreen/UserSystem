@@ -504,6 +504,4 @@ export class UserService {
             return { success: false, error: error.message }
         }
     }
-
-
 }

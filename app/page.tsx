@@ -1,7 +1,10 @@
 import Image from "next/image";
-import Link from 'next/link';
+import { auth } from "@/auth"
+import UserButton from "@/components/user-button"
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth()
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -16,7 +19,7 @@ export default function Home() {
         {/* TITLE BLOCK */}
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            User System
+            Thedas User System
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Features : <br></br>
@@ -27,32 +30,16 @@ export default function Home() {
           </p>
         </div>
         {/* SESSION */}
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Session
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            null
-          </p>
+        <div className="flex flex-col rounded-md bg-gray-100">
+          <div className="rounded-t-md bg-gray-200 p-4 font-bold text-black">
+            Current Session
+          </div>
+          <pre className="whitespace-pre-wrap break-all px-4 py-6 text-black">
+            {JSON.stringify(session, null, 2)}
+          </pre>
         </div>
         {/* NAVIGATION */}
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <Link className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-          href="/register">
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Register
-          </Link>
-          <Link className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-          href="/login">
-            Login
-          </Link>
-        </div>
+        <UserButton></UserButton>
       </main>
     </div>
   );

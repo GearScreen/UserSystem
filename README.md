@@ -1,6 +1,9 @@
 # User System
 
-Simple & Secure user system named Thedas
+Simple & Secure Production ready user system<br>
+There is no live version of it but :<br>
+-See Progress section<br>
+-It's similar to [this official example](https://next-auth-example.vercel.app/)<br>
 
 ## Stack
 
@@ -11,7 +14,7 @@ Front :<br>
 Back :<br>
 -Next.js<br>
 -Auth.js<br>
--JsonWebToken<br>
+-JWT (JsonWebToken)<br>
 -Argon2<br>
 -Prisma<br>
 -MariaDB<br>
@@ -21,6 +24,8 @@ Back :<br>
 -Register Users<br>
 -Login<br>
 -Send Mails (using Mailgun)<br>
+
+-I started doing a custom login before using Auth.js so I'm keeping it (api/users/login route)<br>
 
 ## Security
 
@@ -55,3 +60,7 @@ Back :<br>
 ### Delete User
 
 ```curl -X DELETE http://localhost:3000/api/users?id=1&hard=false```
+
+## Progress
+
+![Image]()

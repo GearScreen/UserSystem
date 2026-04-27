@@ -5,14 +5,22 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 
+import { authenticate } from "./actions"
+
+interface LoginForm {
+    email: string;
+    password: string;
+}
+
 export default function Home() {
     const router = useRouter();
 
-    const [creditential, setCreditential] = useState({
+    const [creditential, setCreditential] = useState<LoginForm>({
         email: '',
         password: '',
     })
 
+    // Custom login
     const tryLogin = async () => {
         try {
             const response = await fetch('/api/users/login', {
@@ -27,10 +35,23 @@ export default function Home() {
             const data = await response.json()
             if (data.success) {
                 // alert('Login successful')
+                // Store JWT
                 router.push('/logged');
             } else {
                 alert(`Error: ${data.error}`)
             }
+        } catch (error) {
+            console.error('Error logging in:', error)
+        }
+    }
+
+    const login = async (creditential: LoginForm) => {
+        try {
+            const formData = new FormData();
+            formData.append("email", creditential.email);
+            formData.append("password", creditential.password);
+            formData.append("redirectTo", "/logged");
+            authenticate(formData)
         } catch (error) {
             console.error('Error logging in:', error)
         }
@@ -51,10 +72,10 @@ export default function Home() {
                     {/* FORM INPUTS */}
                     {/* Email */}
                     <input type="email" placeholder="Email" value={creditential.email} onChange={(e) => setCreditential({ ...creditential, email: e.target.value })}
-                    className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
+                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
                     {/* Password */}
                     <input type="password" placeholder="Password" value={creditential.password} onChange={(e) => setCreditential({ ...creditential, password: e.target.value })}
-                    className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
+                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md" />
                 </div>
                 {/* NAVIGATION */}
                 <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
@@ -73,10 +94,10 @@ export default function Home() {
                     <Link className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background
                     transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
                         href="/register">
-                        No Account? Register
+                        Register
                     </Link>
                     <button
-                        onClick={tryLogin}
+                        onClick={() => login(creditential)} // tryLogin
                         // disabled={!creditential.email}
                         className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5
                         transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]">

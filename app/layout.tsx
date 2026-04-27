@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -17,13 +18,16 @@ export const metadata: Metadata = {
   description: "A simple user system template with registration, login, and security features.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") || "";
+
   return (
     <html lang="en">
+      <head nonce={nonce} suppressHydrationWarning/>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
