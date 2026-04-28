@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@/node_modules/.prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PasswordManager } from '@/lib/password'
 import { EmailService } from '@/services/email.service'

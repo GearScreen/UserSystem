@@ -1,3 +1,5 @@
+import { prisma } from "@/lib/prisma";
+
 import NextAuth from "next-auth"
 import "next-auth/jwt"
 
@@ -5,20 +7,21 @@ import Credentials from "next-auth/providers/credentials";
 import argon2 from "argon2";
 
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
 
 import GitHub from "next-auth/providers/github"
-import Google from "next-auth/providers/google"
-import Twitter from "next-auth/providers/twitter"
+// import Google from "next-auth/providers/google"
+// import Twitter from "next-auth/providers/twitter"
+
+console.log("Prisma instance check:", prisma ? "READY" : "UNDEFINED");
 
 // Auth.js Login
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: PrismaAdapter(prisma) as any,
+    adapter: PrismaAdapter(prisma as any),
     session: { strategy: "jwt" },
     providers: [
         GitHub,
-        Google,
-        Twitter,
+        // Google,
+        // Twitter,
         Credentials({
             async authorize(credentials, request) {
                 const email = credentials?.email as string;
@@ -65,22 +68,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 await prisma.loginAttempt.deleteMany({ where: { ipAddress: ip, emailUsed: email, success: false } });
 
                 console.log("Logged in");
-                return { id: user.id.toString(), email: user.email, role: user.role };
+                return { id: user.id.toString(), email: user.email, role: user.role, username: user.username || "" };
             },
         }),
     ],
-    basePath: "/auth",
+    //basePath: "/auth",
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.username = user.username;
             }
             return token;
         },
         async session({ session, token }) {
-            if (token.role) {
+            if (token) {
                 session.user.id = token.id;
+                session.user.username = token.username;
                 session.user.role = token.role;
             }
             return session;
@@ -131,12 +136,14 @@ declare module "next-auth" {
         id: string;
         email: string;
         role: string;
+        username: string;
     }
 
     interface Session {
         accessToken?: string;
         user: {
             id: string;
+            username: string;
             role: string;
         }
     }
@@ -147,5 +154,6 @@ declare module "next-auth/jwt" {
         accessToken?: string
         id: string;
         role: string;
+        username: string;
     }
 }

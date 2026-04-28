@@ -32,5 +32,8 @@
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@auth/core": "$@auth/core"
   }
 }

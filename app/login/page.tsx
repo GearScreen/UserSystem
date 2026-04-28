@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 
-import { authenticate } from "./actions"
+import { authenticate, gitHubAuth } from "./actions"
 
 interface LoginForm {
     email: string;
@@ -50,8 +50,15 @@ export default function Home() {
             const formData = new FormData();
             formData.append("email", creditential.email);
             formData.append("password", creditential.password);
-            formData.append("redirectTo", "/logged");
-            authenticate(formData)
+            authenticate(formData);
+        } catch (error) {
+            console.error('Error logging in:', error)
+        }
+    }
+
+    const gitHubLogin = async () => {
+        try {
+            gitHubAuth();
         } catch (error) {
             console.error('Error logging in:', error)
         }
@@ -102,6 +109,13 @@ export default function Home() {
                         className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5
                         transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]">
                         Login
+                    </button>
+                    <button
+                        onClick={gitHubLogin}
+                        // disabled={!creditential.email}
+                        className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5
+                        transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]">
+                        Login using GitHub
                     </button>
                 </div>
             </main>

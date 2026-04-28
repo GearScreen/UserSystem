@@ -8,11 +8,13 @@ const rateLimit = new Map<string, { count: number; resetTime: number }>()
 export async function proxy(request: NextRequest) {
     const forwardedFor = request.headers.get('x-forwarded-for');
     const ip = forwardedFor?.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
-    const path = request.nextUrl.pathname;
+    // const path = request.nextUrl.pathname;
     // console.log('Request from IP:', ip, ' to path:', path);
     request.headers.set('x-user-ip', ip)
 
-    if (path.startsWith('/api') && (limitRate(ip))) {
+    const isStatic = request.nextUrl.pathname.startsWith('/_next')
+
+    if (!isStatic && limitRate(ip)) {
         return NextResponse.json(
             { error: "Too many requests" },
             { status: 429 }
@@ -79,7 +81,7 @@ function limitRate(ip: string) {
 
     rateLimit.set(ip, { count: ipLimit.count + 1, resetTime })
 
-    if (ipLimit.count < 5) {
+    if (ipLimit.count < 30) {
         return false
     }
 
