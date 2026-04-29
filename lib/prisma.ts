@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/node_modules/.prisma/client";
+import { PrismaClient } from "@/src/generated/prisma/client";
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 // Singleton prisma instance

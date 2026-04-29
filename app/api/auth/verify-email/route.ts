@@ -33,8 +33,9 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Checck Token Expired
-        if (new Date() > new Date(user.verificationExpiresAt)) {
+        // Check Token Expired
+        let expireDate = new Date(user.verificationExpiresAt || 0)
+        if (new Date() > expireDate) {
             return NextResponse.json(
                 { error: 'Verification link has expired' },
                 { status: 400 }
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
         await prisma.user.update({
             where: { id: user.id },
             data: {
-                emailVerified: true,
+                emailVerified: new Date(),
                 verificationToken: null,
                 verificationExpiresAt: null
             }

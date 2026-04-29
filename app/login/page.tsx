@@ -20,7 +20,7 @@ export default function Home() {
         password: '',
     })
 
-    // Custom login
+    // Full Custom login
     const tryLogin = async () => {
         try {
             const response = await fetch('/api/users/login', {

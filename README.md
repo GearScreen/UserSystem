@@ -1,9 +1,8 @@
 # User System
 
 Simple & Secure Production ready user system<br>
-There is no live version of it but :<br>
--See Progress section<br>
--It's similar to [this official example](https://next-auth-example.vercel.app/)<br>
+Custom creditentials + OAuth Signin<br>
+Unfinished<br>
 
 ## Stack
 
@@ -21,25 +20,24 @@ Back :<br>
 
 ## Features
 
--Register Users<br>
--Login<br>
+-Custom Register Users<br>
+-Custom Login<br>
+-Signin with OAuth (GitHub only for now)<br>
 -Send Mails (using Mailgun)<br>
-
--I started doing a custom login before using Auth.js so I'm keeping it (api/users/login route)<br>
 
 ## Security
 
--Hash & Salt<br>
--Vs Timing Attacks<br>
--IP Based Lockout<br>
+-Hash & Salt Passwords<br>
+-Blackbox auth Vs Timing Attacks<br>
+-IP Rate Limit Vs Brute force Attacks<br>
 
 ## CURL Commands : Open routes
 
-### Create / Register New User
+### Create / Register User
 
 ```curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\", \"password\":\"Test2Test#\", \"username\":\"testUser2\"}" http://localhost:3000/api/users/register```
 
-### Create New User (Weak Password)
+### Create / Register User (Weak Password)
 
 ```curl -X POST -H "Content-Type: application/json" -d "{\"email\":\"test@test.com\", \"password\":\"Test2\", \"username\":\"testUser2\"}" http://localhost:3000/api/users/register```
 

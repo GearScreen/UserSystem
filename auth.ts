@@ -1,18 +1,14 @@
-import { prisma } from "@/lib/prisma";
-
 import NextAuth from "next-auth"
-import "next-auth/jwt"
+import { prisma } from "@/lib/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import Credentials from "next-auth/providers/credentials";
 import argon2 from "argon2";
-
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import "next-auth/jwt"
 
 import GitHub from "next-auth/providers/github"
 // import Google from "next-auth/providers/google"
 // import Twitter from "next-auth/providers/twitter"
-
-console.log("Prisma instance check:", prisma ? "READY" : "UNDEFINED");
 
 // Auth.js Login
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -68,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 await prisma.loginAttempt.deleteMany({ where: { ipAddress: ip, emailUsed: email, success: false } });
 
                 console.log("Logged in");
-                return { id: user.id.toString(), email: user.email, role: user.role, username: user.username || "" };
+                return { id: user.id.toString(), email: user.email || "", role: user.role, username: user.username || "" };
             },
         }),
     ],
